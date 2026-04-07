@@ -16,6 +16,9 @@ import type {
  * If accessed via http://10.x.x.x:3000, it hits http://10.x.x.x:8000.
  */
 const getBaseUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, ""); // Remove trailing slash if present
+  }
   if (typeof window !== "undefined") {
     // Favor the current hostname so network IP access works out-of-the-box
     return `http://${window.location.hostname}:8000`;
