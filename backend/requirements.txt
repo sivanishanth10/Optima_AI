@@ -66,7 +66,6 @@ mmh3==5.2.1
 multidict==6.7.1
 narwhals==2.17.0
 numpy==1.26.4
-nvidia-nccl-cu12==2.29.7
 openai==2.24.0
 openpyxl==3.1.2
 packaging==24.2
@@ -159,7 +158,6 @@ tzlocal==5.3.1
 update-checker==0.18.0
 urllib3==2.6.3
 uvicorn==0.27.1
-uvloop==0.22.1
 validators==0.35.0
 watchdog==6.0.0
 watchfiles==1.1.1
