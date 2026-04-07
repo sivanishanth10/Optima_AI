@@ -7,7 +7,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import AsyncGenerator, Optional, List, Dict, Any
-from utils.ai_client import get_client_for_model
+from utils.ai_client import get_client, map_model_id
 import os
 
 
@@ -34,10 +34,9 @@ async def stream_chat_response(
         JSON-encoded chat deltas
     """
     
-    groq_key = os.getenv("GROQ_API_KEY") or api_key
     openrouter_key = os.getenv("OPENROUTER_API_KEY") or api_key
-    
-    client, _ = get_client_for_model(model, groq_key, openrouter_key)
+    mapped_model = map_model_id(model)
+    client = get_client(mapped_model, openrouter_key)
     
     # Build system context
     system_msg = "You are Optima AI, an expert data analyst."
@@ -57,7 +56,7 @@ async def stream_chat_response(
     try:
         # Create completion stream
         stream = client.chat.completions.create(
-            model=model,
+            model=mapped_model,
             messages=api_messages,
             stream=True,
             temperature=0.7,

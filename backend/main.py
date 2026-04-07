@@ -281,7 +281,7 @@ def analyze_initial_file(req: AnalyzeInitRequest):
 def analyze_data(req: AnalyzeRequest):
     """Takes a dataset fingerprint and generates a cleaning plan via OpenRouter."""
     start_time = time.time()
-    api_key = req.api_key or os.getenv("GROQ_API_KEY") or os.getenv("OPENROUTER_API_KEY")
+    api_key = req.api_key or os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise HTTPException(status_code=401, detail="API Key required.")
     
@@ -303,7 +303,7 @@ def analyze_data(req: AnalyzeRequest):
 @app.post("/api/diagnose")
 def diagnose_data(req: AnalyzeRequest):
     """Generates an AI diagnostic report. Auto-retries with fallback models on rate-limit (429)."""
-    api_key = req.api_key or os.getenv("GROQ_API_KEY") or os.getenv("OPENROUTER_API_KEY")
+    api_key = req.api_key or os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise HTTPException(status_code=401, detail="API Key required.")
 
@@ -335,7 +335,7 @@ def diagnose_data(req: AnalyzeRequest):
 def clean_dataset(req: CleanRequest):
     """Generates a cleaning plan using AI, executes it on the dataset, and uploads the cleaned version."""
     start_time = time.time()
-    api_key = req.api_key or os.getenv("GROQ_API_KEY") or os.getenv("OPENROUTER_API_KEY")
+    api_key = req.api_key or os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise HTTPException(status_code=401, detail="API Key required.")
     
@@ -472,7 +472,7 @@ def chat_with_data(req: ChatRequest):
     """Streams a chat response based on the dataset profile and user prompt."""
     print(f"DEBUG: Received chat request: {req.prompt[:50]}...")
     start_time = time.time()
-    api_key = req.api_key or os.getenv("GROQ_API_KEY") or os.getenv("OPENROUTER_API_KEY")
+    api_key = req.api_key or os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise HTTPException(status_code=401, detail="API Key required.")
     

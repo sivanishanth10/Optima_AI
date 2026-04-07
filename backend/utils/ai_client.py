@@ -6,21 +6,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+def map_model_id(model_id: str) -> str:
+    mapping = {
+        "llama-3.3-70b-versatile": "meta-llama/llama-3.3-70b-instruct",
+        "llama-3.1-8b-instant": "meta-llama/llama-3.1-8b-instruct",
+        "mixtral-8x7b-32768": "mistralai/mixtral-8x7b-instruct",
+        "llama3-70b-8192": "meta-llama/llama-3-70b-instruct",
+        "llama3-8b-8192": "meta-llama/llama-3-8b-instruct",
+        "gemma2-9b-it": "google/gemma-2-9b-it",
+    }
+    return mapping.get(model_id, model_id)
+
 def get_client(model_id: str, api_key: str = None) -> OpenAI:
     """
-    Returns an OpenAI-compatible client for either Groq or OpenRouter.
+    Returns an OpenAI-compatible client pointing to OpenRouter.
     """
-    # OpenRouter models often have a / in them (e.g., google/gemini-flash-1.5)
-    # or specific IDs like stepfun/step-1-8k
-    is_openrouter = "/" in model_id or model_id.startswith("stepfun")
-    
-    if is_openrouter:
-        base_url = "https://openrouter.ai/api/v1"
-        key = api_key or os.getenv("OPENROUTER_API_KEY")
-    else:
-        # Default to Groq for simplicity
-        base_url = "https://api.groq.com/openai/v1"
-        key = api_key or os.getenv("GROQ_API_KEY")
+    base_url = "https://openrouter.ai/api/v1"
+    key = api_key or os.getenv("OPENROUTER_API_KEY")
     
     return OpenAI(
         base_url=base_url,
@@ -133,16 +135,17 @@ def _robust_parse_json(raw: str) -> dict:
 
 def request_ai(prompt: str, model_id: str = "llama-3.3-70b-versatile") -> tuple[str, str | None]:
     """
-    Generic AI request with cross-provider fallback.
+    Generic AI request using OpenRouter.
     Returns: (content_str, fallback_note)
     """
+    model_id = map_model_id(model_id)
     fallback_chain = [
         model_id,
-        "llama-3.3-70b-versatile",          # Groq
-        "google/gemini-2.0-flash-exp:free", # OpenRouter
-        "llama-3.1-8b-instant",             # Groq
-        "deepseek/deepseek-chat",           # OpenRouter
-        "mixtral-8x7b-32768",               # Groq
+        "meta-llama/llama-3.3-70b-instruct",
+        "google/gemini-2.0-flash-exp:free",
+        "meta-llama/llama-3.1-8b-instruct",
+        "deepseek/deepseek-chat",     
+        "mistralai/mixtral-8x7b-instruct",  
     ]
     
     unique_models = []
@@ -169,9 +172,7 @@ def request_ai(prompt: str, model_id: str = "llama-3.3-70b-versatile") -> tuple[
             
             fallback_note = None
             if used_fallback:
-                original_prov = "OpenRouter" if ("/" in model_id or model_id.startswith("stepfun")) else "Groq"
-                current_prov = "OpenRouter" if ("/" in current_model or current_model.startswith("stepfun")) else "Groq"
-                fallback_note = f"Note: Selected model ({model_id}) on {original_prov} failed. Using {current_model} on {current_prov}."
+                fallback_note = f"Note: Selected model ({model_id}) failed. Using fallback: {current_model}."
 
             return content, fallback_note
 
