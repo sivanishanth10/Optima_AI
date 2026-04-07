@@ -229,10 +229,10 @@ export default function MetricsPane({
             <div className="grid grid-cols-2 gap-3">
               {metrics.task === "classification" && (
                 <>
-                  <MetricCard label="Accuracy" value={metrics.accuracy} good={0.7} great={0.85} />
-                  <MetricCard label="F1 Score" value={metrics.f1} good={0.7} great={0.85} />
-                  <MetricCard label="Precision" value={metrics.precision} good={0.7} great={0.85} />
-                  <MetricCard label="Recall" value={metrics.recall} good={0.7} great={0.85} />
+                  <MetricCard label="Accuracy" value={metrics.accuracy ?? 0} good={0.7} great={0.85} />
+                  <MetricCard label="F1 Score" value={metrics.f1 ?? 0} good={0.7} great={0.85} />
+                  <MetricCard label="Precision" value={metrics.precision ?? 0} good={0.7} great={0.85} />
+                  <MetricCard label="Recall" value={metrics.recall ?? 0} good={0.7} great={0.85} />
                 </>
               )}
 
