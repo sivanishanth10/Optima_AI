@@ -1,5 +1,11 @@
 export type TabId = "diagnostics" | "plan" | "dashboard" | "metrics" | "code" | "kb";
 
+export type UserRole = "beginner" | "intermediate" | "senior";
+export type UserPurpose = "cleaning" | "other";
+export interface UserPreferences {
+  role: UserRole;
+  purpose: UserPurpose;
+}
 // ─── Shared ────────────────────────────────────────────────────────────────────
 export interface DatasetFingerprint {
   shape: [number, number];
