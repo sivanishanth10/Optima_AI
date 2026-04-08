@@ -45,16 +45,13 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Allow requests from the Next.js frontend (local and network IPs)
-# Allow specific origins for development
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8000",
-]
+# Allow requests from local development and any Render subdomain
+# This regex matches http://localhost:3000, http://127.0.0.1:3000, and https://*.onrender.com
+allow_origin_regex = r"https?://(localhost|127\.0\.0\.1|.*\.onrender\.com)(:[0-9]+)?"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex=allow_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
