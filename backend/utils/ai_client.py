@@ -17,16 +17,28 @@ def map_model_id(model_id: str) -> str:
     }
     return mapping.get(model_id, model_id)
 
-def get_client(model_id: str, api_key: str = None) -> OpenAI:
+def get_client(model_id: str, api_key: str | None = None) -> OpenAI:
     """
     Returns an OpenAI-compatible client pointing to OpenRouter.
     """
     base_url = "https://openrouter.ai/api/v1"
     key = api_key or os.getenv("OPENROUTER_API_KEY")
     
+    # OpenRouter recommends including these headers for their rankings
+    extra_headers = {
+        "HTTP-Referer": "http://localhost:3000",
+        "X-Title": "Optima AI",
+    }
+
+    if not key:
+        print("DEBUG: [get_client] No API key found in env or arguments!")
+    else:
+        print(f"DEBUG: [get_client] Using API key: {key[:8]}...{key[-4:]}")
+
     return OpenAI(
         base_url=base_url,
-        api_key=(key or "").strip()
+        api_key=(key or "").strip(),
+        default_headers=extra_headers
     )
 
 def plan_prompt(fingerprint: dict, max_steps: int = 15) -> str:

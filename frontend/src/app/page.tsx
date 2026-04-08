@@ -320,8 +320,10 @@ export default function Home() {
     if (initialPrompt) setChatInput("");
 
     try {
+      console.log("DEBUG: Starting file upload for", file.name);
       // Step 1: Upload file (Must be first to get the path)
       const uploadData = await api.uploadFile(file);
+      console.log("DEBUG: Upload successful, path:", uploadData.file_path);
 
       // Step 2: Analyze & Metrics in Parallel
       // We start both but await analyzeInit first as it's required for the workspace UI
@@ -395,7 +397,9 @@ export default function Home() {
         setMessages(baseMessages);
       }
     } catch (err: any) {
-      setUploadStatus({ msg: err.message ?? "Upload failed", isError: true });
+      console.error("DEBUG: Upload failed error:", err);
+      const errorMessage = err.message || "Upload failed (Network Error or CORS)";
+      setUploadStatus({ msg: errorMessage, isError: true });
       setUploading(false);
     }
   };
