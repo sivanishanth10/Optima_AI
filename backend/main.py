@@ -429,7 +429,7 @@ def clean_dataset(req: CleanRequest):
                 "cleaned": metrics_post
             },
             "cleaned_data": {
-                "file_path": cleaned_filename,
+                "file_path": os.path.basename(cleaned_filename),
                 "shape": cleaned_fingerprint["shape"],
                 "fingerprint": cleaned_fingerprint
             }
@@ -453,7 +453,7 @@ def verify_pattern(req: VerifyRequest):
         raise HTTPException(status_code=404, detail="Pattern not found in staging")
     return {"message": "Pattern verified and pushed to production KB"}
 
-@app.get("/api/download/report/{filename}")
+@app.get("/api/downloads/report/{filename}")
 def download_report(filename: str):
     """Serves a generated report file (e.g., Python script) for download."""
     file_path = os.path.join(UPLOAD_DIR, filename)

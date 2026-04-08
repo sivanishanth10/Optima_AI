@@ -220,7 +220,7 @@ export function getCleanedCsvUrl(filename: string): string {
 
 /** Returns the direct URL for a report download (Python script or text report) */
 export function getReportDownloadUrl(filename: string): string {
-  return `${BASE_URL}/api/download/report/${filename}`;
+  return `${BASE_URL}/api/downloads/report/${filename}`;
 }
 
 // ─── Knowledge Base ──────────────────────────────────────────────────────────
