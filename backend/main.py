@@ -3,6 +3,7 @@ import json
 import shutil
 import uuid
 import time
+import urllib.parse
 import pandas as pd
 from io import BytesIO
 from dotenv import load_dotenv
@@ -61,9 +62,12 @@ app.add_middleware(
 async def download_file_robust(filename: str):
     """
     Serves files from the uploads directory. 
-    Smartly handles cases where the filename might include a redundant 'uploads/' prefix.
+    Handles redundant 'uploads/' prefixes, URL encoding, and Linux case-sensitivity.
     """
-    # Strip redundant 'uploads/' prefix if it got doubled up
+    # 1. Unquote the filename (e.g. handle %20 or other encoded chars)
+    filename = urllib.parse.unquote(filename)
+    
+    # 2. Strip redundant 'uploads/' prefix if it got doubled up
     clean_filename = filename
     if filename.startswith("uploads/"):
         clean_filename = filename[len("uploads/"):]
@@ -72,14 +76,26 @@ async def download_file_robust(filename: str):
         
     file_path = os.path.join(UPLOAD_DIR, clean_filename)
     
+    # 3. Case-Insensitive Fallback (Crucial for Linux/Render)
+    if not os.path.exists(file_path):
+        # Scan the directory for a case-insensitive match
+        try:
+            files = os.listdir(UPLOAD_DIR)
+            match = next((f for f in files if f.lower() == clean_filename.lower()), None)
+            if match:
+                file_path = os.path.join(UPLOAD_DIR, match)
+                clean_filename = match
+        except:
+            pass
+            
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail=f"File not found: {clean_filename}")
     
     # Determine the media type
     media_type = "application/octet-stream"
-    if clean_filename.endswith(".csv"):
+    if clean_filename.lower().endswith(".csv"):
         media_type = "text/csv"
-    elif clean_filename.endswith(".py"):
+    elif clean_filename.lower().endswith(".py"):
         media_type = "text/x-python"
         
     return FileResponse(path=file_path, filename=os.path.basename(clean_filename), media_type=media_type)
