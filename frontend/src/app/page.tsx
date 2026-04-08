@@ -148,12 +148,27 @@ export default function Home() {
   useEffect(() => {
     // Initial check
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        // Handle explicit auth errors (like invalid refresh tokens)
+        if (error) {
+          console.warn("Auth session error, signing out:", error.message);
+          await supabase.auth.signOut();
+          router.push("/login");
+          return;
+        }
+
+        if (!session) {
+          router.push("/login");
+        } else {
+          localStorage.setItem("optima_token", session.access_token);
+          setUser(session.user);
+        }
+      } catch (err) {
+        console.error("Auth initialization failed:", err);
+        await supabase.auth.signOut();
         router.push("/login");
-      } else {
-        localStorage.setItem("optima_token", session.access_token);
-        setUser(session.user);
       }
     };
     checkUser();
