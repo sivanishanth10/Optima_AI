@@ -57,8 +57,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the uploads directory to serve downloaded cleaned files
-app.mount("/api/downloads", StaticFiles(directory=UPLOAD_DIR), name="downloads")
+@app.get("/api/downloads/{filename:path}")
+async def download_file_robust(filename: str):
+    """
+    Serves files from the uploads directory. 
+    Smartly handles cases where the filename might include a redundant 'uploads/' prefix.
+    """
+    # Strip redundant 'uploads/' prefix if it got doubled up
+    clean_filename = filename
+    if filename.startswith("uploads/"):
+        clean_filename = filename[len("uploads/"):]
+    elif filename.startswith("/uploads/"):
+        clean_filename = filename[len("/uploads/"):]
+        
+    file_path = os.path.join(UPLOAD_DIR, clean_filename)
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail=f"File not found: {clean_filename}")
+    
+    # Determine the media type
+    media_type = "application/octet-stream"
+    if clean_filename.endswith(".csv"):
+        media_type = "text/csv"
+    elif clean_filename.endswith(".py"):
+        media_type = "text/x-python"
+        
+    return FileResponse(path=file_path, filename=os.path.basename(clean_filename), media_type=media_type)
 
 # ── MODELS ──
 class AnalyzeInitRequest(BaseModel):
